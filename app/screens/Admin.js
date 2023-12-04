@@ -7,10 +7,12 @@ import {
   StyleSheet,
   ImageBackground,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import * as Font from "expo-font";
-// we need to wait for it to complete before we can use the font.
+
 const Admin = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const loadFont = async () => {
@@ -23,9 +25,17 @@ const Admin = () => {
     loadFont();
   }, []);
 
+  const handleLoginPress = () => {
+    // Thực hiện các logic đăng nhập ở đây (nếu cần)
+
+    // Chuyển hướng đến trang AdminHome
+    navigation.navigate("AdminHome");
+  };
+
   if (!fontLoaded) {
     return <View />;
   }
+
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -42,7 +52,7 @@ const Admin = () => {
             <Text style={styles.label}>Mật khẩu</Text>
             <TextInput style={styles.input} secureTextEntry={true} />
           </View>
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={handleLoginPress}>
             <Text style={styles.buttonText}>Bắt đầu</Text>
           </TouchableOpacity>
         </View>
