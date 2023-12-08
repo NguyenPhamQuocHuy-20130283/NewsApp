@@ -1,57 +1,98 @@
-// Trong App.js
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
-import Admin from "./app/screens/Admin";
-import AdminHome from "./app/screens/AdminHome";
-import AddArticle from "./app/screens/AddArticle";
-import Icon from "react-native-vector-icons/FontAwesome";
-import { TouchableOpacity } from "react-native-gesture-handler";
+// App.js
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+
+import { Image } from 'react-native';
+import HienThi from './app/screens/user/HienThi';
+import TimKiem from './app/screens/user/TimKiem';
+import LichSu from './app/screens/user/LichSu';
+import Home from './app/screens/user/Home';
+import TaiKhoan from './app/screens/user/TaiKhoan';
+
+
 
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
+const TimKiemStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen name="TimKiem" component={TimKiem} options={{ headerShown: false }} />
+    <Stack.Screen name="HienThi" component={HienThi} options={{ headerShown: false }} />
+  </Stack.Navigator>
+);
+
+
+
+
 
 const App = () => {
   return (
+    
     <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Admin"
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: "#6941DE", // Màu nền của header
-          },
-          headerTintColor: "white", // Màu chữ trong header
-
-          headerTitleAlign: "center", // Căn giữa tiêu đề trong header
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => {
-                // Xử lý khi nhấn vào icon (ví dụ: mở menu quản trị viên)
-              }}
-            >
-              <Icon
-                name="bars"
-                size={30}
-                color="white"
-                style={{ marginRight: 10 }}
-              />
-            </TouchableOpacity>
-          ),
-          headerTitle: null, // Ẩn tiêu đề
+      <Tab.Navigator
+        initialRouteName="Home"
+        tabBarOptions={{
+          activeTintColor: '#6941DE',
+          inactiveTintColor: 'gray',
         }}
       >
-        <Stack.Screen
-          name="Admin"
-          component={Admin}
+        <Tab.Screen
+          name="Home"
+          component={Home}
           options={{
-            headerShown: false, // Ẩn header của Admin
+            tabBarLabel: '',
+            tabBarIcon: ({ color, size }) => (
+              <Image
+              source={require('./app/assets/home.png')} // Đường dẫn đến ảnh trong thư mục assets
+              style={{ width: size, height: size, tintColor: color }}
+            />
+            ),
           }}
         />
-        <Stack.Screen name="AdminHome" component={AdminHome} />
-        <Stack.Screen name="AddArticle" component={AddArticle} />
-      </Stack.Navigator>
+        <Tab.Screen
+          name="TimKiem"
+          component={TimKiemStack}
+          options={{
+            headerShown: false,
+            tabBarLabel: '',
+            tabBarIcon: ({ color, size }) => (
+              <Image
+              source={require('./app/assets/grid_view.png')} // Đường dẫn đến ảnh trong thư mục assets
+              style={{ width: size, height: size, tintColor: color }}
+            />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="LichSu"
+          component={LichSu}
+          options={{
+            headerShown: false,
+            tabBarLabel: '',
+            tabBarIcon: ({ color, size }) => (
+              <Image
+              source={require('./app/assets/history.png')} // Đường dẫn đến ảnh trong thư mục assets
+              style={{ width: size, height: size, tintColor: color }}
+            />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="TaiKhoan"
+          component={TaiKhoan}
+          options={{
+            tabBarLabel: '',
+            tabBarIcon: ({ color, size }) => (
+              <Image
+              source={require('./app/assets/account_box.png')} // Đường dẫn đến ảnh trong thư mục assets
+              style={{ width: size, height: size, tintColor: color }}
+            />
+            ),
+          }}
+        />
+      </Tab.Navigator>
     </NavigationContainer>
   );
 };
