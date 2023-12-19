@@ -10,17 +10,20 @@ import {
   ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import DropDownPicker from "react-native-dropdown-picker";
+import { SelectList } from "react-native-dropdown-select-list";
 import { Input } from "@rneui/themed/dist/Input";
 
 export default function AddArticle() {
   const [image, setImage] = useState(null);
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState(null);
-  const categories = [
-    { label: "Thể loại 1", value: "category1" },
-    { label: "Thể loại 2", value: "category2" },
-    // Thêm các thể loại khác nếu cần
+  const [selectedItem, setSelectedItem] = useState(null);
+  const data = [
+    { key: "1", value: "Item 1" },
+    { key: "2", value: "Item 2" },
+    { key: "3", value: "Item 3" },
+    { key: "4", value: "Item 4" },
+    { key: "5", value: "Item 5" },
+    { key: "6", value: "Item 6" },
   ];
 
   const pickImage = async () => {
@@ -77,18 +80,15 @@ export default function AddArticle() {
               numberOfLines={30}
             />
           </View>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Thể loại</Text>
-            <DropDownPicker
-              items={categories}
-              placeholder="Chọn thể loại"
-              containerStyle={styles.dropdownContainer}
-              style={styles.dropdown}
-              itemStyle={styles.dropdownItem}
-              dropDownStyle={styles.dropdownDropdown}
-              onChangeItem={(item) => setCategory(item.value)}
+          <View style={styles.container}>
+            <Text style={styles.label}>Select an Item:</Text>
+            <SelectList
+              data={data}
+              setSelected={setSelectedItem}
+              style={styles.dropdownContainer}
             />
           </View>
+
           <TouchableOpacity style={styles.button} onPress={addArticle}>
             <Text style={styles.buttonText}>Thêm bài viết</Text>
           </TouchableOpacity>
@@ -152,6 +152,7 @@ const styles = StyleSheet.create({
     width: "50%",
     alignSelf: "center",
     marginBottom: 10,
+    marginTop: 20,
   },
   button_image: {
     backgroundColor: "#6941DE",
@@ -176,22 +177,21 @@ const styles = StyleSheet.create({
     marginLeft: 20,
   },
   dropdownContainer: {
-    height: 40,
+    width: "100%",
+    marginTop: 8,
     marginBottom: 20,
   },
   dropdown: {
-    backgroundColor: "#F0F0F0",
+    backgroundColor: "#fafafa",
     borderWidth: 1,
-    borderColor: "white",
-    borderRadius: 5,
+    borderColor: "#ced4da",
   },
   dropdownItem: {
     justifyContent: "flex-start",
   },
   dropdownDropdown: {
-    backgroundColor: "#F0F0F0",
+    backgroundColor: "#fafafa",
     borderWidth: 1,
-    borderColor: "white",
-    borderRadius: 5,
+    borderColor: "#ced4da",
   },
 });
