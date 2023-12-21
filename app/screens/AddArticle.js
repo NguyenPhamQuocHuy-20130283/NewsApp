@@ -12,19 +12,28 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { SelectList } from "react-native-dropdown-select-list";
 import { Input } from "@rneui/themed/dist/Input";
-
+import axios from "axios";
 export default function AddArticle() {
   const [image, setImage] = useState(null);
   const [title, setTitle] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
-  const data = [
-    { key: "1", value: "Item 1" },
-    { key: "2", value: "Item 2" },
-    { key: "3", value: "Item 3" },
-    { key: "4", value: "Item 4" },
-    { key: "5", value: "Item 5" },
-    { key: "6", value: "Item 6" },
-  ];
+
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.post(
+          "https://newsapi-springboot-production.up.railway.app/api/category/getAll"
+        );
+        setCategories(response.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -83,7 +92,10 @@ export default function AddArticle() {
           <View style={styles.container}>
             <Text style={styles.label}>Select an Item:</Text>
             <SelectList
-              data={data}
+              data={categories.map((category) => ({
+                key: category.id.toString(),
+                value: category.name,
+              }))}
               setSelected={setSelectedItem}
               style={styles.dropdownContainer}
             />
