@@ -1,14 +1,12 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-
-import { Image, View } from "react-native";
-import HienThi from "./app/screens/user/HienThi";
-import TimKiem from "./app/screens/user/TimKiem";
-import LichSu from "./app/screens/user/LichSu";
-import Home from "./app/screens/user/Home";
-import TaiKhoan from "./app/screens/user/TaiKhoan";
+import Admin from "./app/screens/Admin";
+import AdminHome from "./app/screens/AdminHome";
+import AddArticle from "./app/screens/AddArticle";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { Alert } from "react-native";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -98,9 +96,9 @@ const App = () => {
             ),
           }}
         />
-        <Tab.Screen
-          name="TaiKhoan"
-          component={TaiKhoan}
+        <Stack.Screen
+          name="AdminHome"
+          component={AdminHome}
           options={{
             tabBarShowLabel: false,
             headerShown: false,
@@ -116,6 +114,7 @@ const App = () => {
             ),
           }}
         />
+        <Stack.Screen name="AddArticle" component={AddArticle} />
       </Tab.Navigator>
     </NavigationContainer>
     
