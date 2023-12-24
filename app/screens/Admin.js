@@ -15,6 +15,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import Toast from "react-native-toast-message";
+import { SafeAreaView } from "react-native";
+import * as Crypto from "expo-crypto";
 
 const Admin = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
@@ -41,11 +43,16 @@ const Admin = () => {
     try {
       setLoading(true);
       // Gọi API đăng nhập sử dụng axios
+      // Hash the password before sending it to the server
+      const hashedPassword = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        password
+      );
       const response = await axios.post(
         "https://newsapi-springboot-production.up.railway.app/api/admin/login",
         {
           email,
-          password,
+          password: hashedPassword,
         },
         {
           headers: {
@@ -58,6 +65,7 @@ const Admin = () => {
       if (!response.data.id) {
         // Xử lý khi có lỗi (ví dụ: thông báo lỗi)
         console.error("Email hoặc mật khẩu không đúng");
+        setLoading(false); // Tắt chế độ loading
         return;
       }
 
@@ -72,11 +80,13 @@ const Admin = () => {
         text1: "Đăng nhập thành công",
         text2: "Chào mừng bạn đến với trang quản trị viên",
       });
+
       // Hiển thị thông báo chào mừng
     } catch (error) {
       // Xử lý lỗi ở đây
       // Ví dụ: Hiển thị thông báo lỗi
       Alert.alert("Lỗi", "Đăng nhập thất bại. Vui lòng thử lại sau.");
+      setLoading(false);
       console.error("Lỗi khi gọi API đăng nhập", error);
     } finally {
       setLoading(false); // Set loading to false when the login process completes
@@ -88,62 +98,64 @@ const Admin = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require("../assets/admin_login.png")}
-        style={styles.imageBackground}
-      >
-        <View style={styles.overlay}>
-          <Text style={styles.loginText}>Đăng nhập</Text>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              onChangeText={(text) => setEmail(text)}
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Mật khẩu</Text>
-            <View style={styles.passwordInputContainer}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <ImageBackground
+          source={require("../assets/admin_login.png")}
+          style={styles.imageBackground}
+        >
+          <View style={styles.overlay}>
+            <Text style={styles.loginText}>Đăng nhập</Text>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Email</Text>
               <TextInput
                 style={styles.input}
-                secureTextEntry={!showPassword}
-                onChangeText={(text) => setPassword(text)}
+                onChangeText={(text) => setEmail(text)}
               />
-              <TouchableOpacity
-                style={styles.iconContainer}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Icon
-                  name={showPassword ? "eye-slash" : "eye"}
-                  size={20}
-                  color="black"
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Mật khẩu</Text>
+              <View style={styles.passwordInputContainer}>
+                <TextInput
+                  style={styles.input}
+                  secureTextEntry={!showPassword}
+                  onChangeText={(text) => setPassword(text)}
                 />
+                <TouchableOpacity
+                  style={styles.iconContainer}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Icon
+                    name={showPassword ? "eye-slash" : "eye"}
+                    size={20}
+                    color="black"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleLoginPress}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="large" color="white" />
+              ) : (
+                <Text style={styles.buttonText}>Bắt đầu</Text>
+              )}
+            </TouchableOpacity>
+            <View style={styles.registerContainer}>
+              <Text style={styles.registerText}>Bạn chưa có tài khoản</Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Admin_Register")}
+              >
+                <Text style={styles.registerLink}>Đăng ký</Text>
               </TouchableOpacity>
             </View>
           </View>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleLoginPress}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator size="large" color="white" />
-            ) : (
-              <Text style={styles.buttonText}>Bắt đầu</Text>
-            )}
-          </TouchableOpacity>
-          <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>Bạn chưa có tài khoản</Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Admin_Register")}
-            >
-              <Text style={styles.registerLink}>Đăng ký</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ImageBackground>
-    </View>
+        </ImageBackground>
+      </View>
+    </SafeAreaView>
   );
 };
 
