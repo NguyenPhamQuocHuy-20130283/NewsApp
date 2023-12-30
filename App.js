@@ -42,7 +42,8 @@ const App = () => {
           name="Home"
           component={Home}
           options={{
-            tabBarLabel: "",
+            tabBarShowLabel: false,
+            headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <Image
                 source={require("./app/assets/home.png")} // Đường dẫn đến ảnh trong thư mục assets
@@ -55,8 +56,8 @@ const App = () => {
           name="TimKiem"
           component={TimKiemStack}
           options={{
+            tabBarShowLabel: false,
             headerShown: false,
-            tabBarLabel: "",
             tabBarIcon: ({ color, size }) => (
               <Image
                 source={require("./app/assets/grid_view.png")} // Đường dẫn đến ảnh trong thư mục assets
@@ -69,8 +70,8 @@ const App = () => {
           name="LichSu"
           component={LichSu}
           options={{
+            tabBarShowLabel: false,
             headerShown: false,
-            tabBarLabel: "",
             tabBarIcon: ({ color, size }) => (
               <Image
                 source={require("./app/assets/history.png")} // Đường dẫn đến ảnh trong thư mục assets
@@ -83,7 +84,8 @@ const App = () => {
           name="TaiKhoan"
           component={TaiKhoan}
           options={{
-            tabBarLabel: "",
+            tabBarShowLabel: false,
+            headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <Image
                 source={require("./app/assets/account_box.png")} // Đường dẫn đến ảnh trong thư mục assets
