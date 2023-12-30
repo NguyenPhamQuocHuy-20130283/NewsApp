@@ -2,9 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image, FlatList } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
-export default function LichSu({}) {
- 
-
+export default function LichSu() {
   const handleItemClick = () => {
     console.log('Mục được nhấp vào');
   };
