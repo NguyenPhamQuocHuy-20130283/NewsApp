@@ -52,8 +52,8 @@ const Admin = () => {
             <Text style={styles.label}>Mật khẩu</Text>
             <TextInput style={styles.input} secureTextEntry={true} />
           </View>
-          <TouchableOpacity style={styles.button} onPress={handleLoginPress}>
-            <Text style={styles.buttonText}>Bắt đầu</Text>
+          <TouchableOpacity style={styles.button} onPress={(handleLoginPress)}>
+            <Text style={styles.buttonText}>Đăng Nhập</Text>
           </TouchableOpacity>
         </View>
       </ImageBackground>

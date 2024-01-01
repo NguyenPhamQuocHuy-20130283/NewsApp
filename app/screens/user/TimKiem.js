@@ -93,9 +93,11 @@ export default function TimKiem({ navigation }) {
   }
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 24,
+    paddingTop: 0,
     flex: 1,
     backgroundColor: '#fff',
+    marginTop: 40,
+
   },
   searchContainer: {
     flexDirection: 'row',

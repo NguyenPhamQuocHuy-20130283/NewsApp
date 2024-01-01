@@ -9,7 +9,7 @@ const ListHome = () => {
       content: "Theo trung tướng Nguyễn Minh Đức, việc cấm tuyệt đối nồng độ cồn khi lái xe cần tiếp tục quy định trong luật mới, đảm bảo thống nhất với Luật Phòng",
       category: "Thời Sự",
       date: "29/11/2023",
-      imageUrl: "../app/assets/anhBao1.png",
+      imageUrl: "../../assets/anhBao1.png",
     },
     {
       id: "2",
@@ -33,7 +33,7 @@ const ListHome = () => {
       content: "Quan chức Nga cho rằng kế hoạch tác chiến của Ukraine đã thất bại hoàn toàn. Lực lượng Nga đánh chặn 32 UAV và 13 quả tên lửa của Ukraine",
       category: "Thời Sự",
       date: "30/12/2023",
-      imageUrl: "../../assets/anhBao4.jpg",
+      imageUrl: "../../assets/anhBao4.png",
     },
     {
       id: "5",
@@ -57,7 +57,7 @@ const ListHome = () => {
       content: "Hàng trăm nghìn biển số ô tô đã lên sàn đấu giá trực tuyến trong năm 2023 với kết quả thành công ấn tượng, mức giá trúng của hầu hết biển đẹp đều là tiền tỷ. Trong top 10 biển số trúng đấu giá đắt nhất năm 2023 có 6 biển ngũ quý, 1 biển sảnh tiến",
       category: "Đời Sống",
       date: "31/12/2023",
-      imageUrl: "../../assets/anhBao7.png",
+      imageUrl: "../../../assets/anhBao7.png",
     },
     {
       id: "8",
@@ -116,14 +116,10 @@ const ListHome = () => {
             </View>
             <View style={styles.newsImagesDiv}>
               <View style={styles.newsImagesSmall}>
-                {/* <Image
-                  style={styles.newsImages}
-                  // source={require(item.imageUrl)}
-                  source={{ uri: item.imageUrl }}
-                /> */}
                 <Image
                   style={styles.newsImages}
-                  source={{ uri: item.imageUrl }}
+                  source={{ uri: item.imageUri }}
+                  // source={require("../../assets/anhBao1.png")}
                 />
               </View>
             </View>
@@ -206,7 +202,7 @@ const styles = StyleSheet.create({
     // maxWidth: "30%",
     width: "35%",
     height: "100%",
-    // backgroundColor: "gray",
+    backgroundColor: "gray",
     justifyContent: "flex-end",
     right: 0,
     position: "absolute",
@@ -217,6 +213,7 @@ const styles = StyleSheet.create({
     maxHeight: "100%",
     maxWidth: "100%",
     margin: 2,
+    // position: "absolute",
   },
 
   newsImages: {

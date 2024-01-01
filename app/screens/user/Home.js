@@ -13,6 +13,7 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
+      {/* <StatusBar barStyle={"default"} /> */}
       <View style={styles.header}>
         <View style={styles.headerDiv}>
           <Text style={styles.headerText}>Tin Tức</Text>
@@ -60,6 +61,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     borderBottomColor: "#6941DE",
     borderBottomWidth: 2,
+    marginTop: 40,
   },
 
   // Header
@@ -73,7 +75,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingRight: 18,
-    marginTop: 40,
+    marginTop: 0,
   },
 
   headerDiv: {

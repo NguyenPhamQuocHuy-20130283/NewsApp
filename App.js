@@ -44,7 +44,7 @@ const App = () => {
           options={{
             tabBarShowLabel: false,
             headerShown: false,
-            tabBarIcon: ({ color, size }) => (
+            tabBarIcon: ({ color }) => (
               <Image
                 source={require("./app/assets/home.png")} // Đường dẫn đến ảnh trong thư mục assets
                 style={{ width: 30, height: 30, tintColor: color }}
@@ -86,10 +86,10 @@ const App = () => {
           options={{
             tabBarShowLabel: false,
             headerShown: false,
-            tabBarIcon: ({ color, size }) => (
+            tabBarIcon: ({ color }) => (
               <Image
                 source={require("./app/assets/account_box.png")} // Đường dẫn đến ảnh trong thư mục assets
-                style={{ width: 28, height: 28, tintColor: color }}
+                style={{ width: 28, height: 28, tintColor: color}}
               />
             ),
           }}
