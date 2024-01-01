@@ -1,21 +1,12 @@
-// Home.js
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native'
+import React from 'react'
 
 const TaiKhoan = () => {
   return (
-    <View style={styles.container}>
-      <Text>Account</Text>
+    <View>
+      <Text>TaiKhoan</Text>
     </View>
-  );
-};
+  )
+}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
-
-export default TaiKhoan;
+export default TaiKhoan

@@ -66,7 +66,6 @@ const styles = StyleSheet.create({
   header: {
     height: 80,
     width: "100%",
-    marginTop: 40,
     backgroundColor: "#fff",
     borderBottomColor: "#6941DE",
     borderBottomWidth: 3,
@@ -74,8 +73,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingRight: 18,
-    // justifyContent: "center",
-    // alignItems: "flex-start",
+    marginTop: 40,
   },
 
   headerDiv: {
@@ -108,8 +106,8 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     height: "100%",
-    marginTop: 7,
-    backgroundColor: '#fff',
+    marginTop: 0,
+    backgroundColor: "#fff",
   },
 
   bodyBig: {
@@ -121,10 +119,10 @@ const styles = StyleSheet.create({
   bodyDiv: {
     maxHeight: 220,
     overflow: "hidden",
+    marginTop: 10,
     marginBottom: 15,
     borderRadius: 10 ,
     borderColor: "black",
-    // borderWidth: 2,
   },
 
   pictureCredit: {
