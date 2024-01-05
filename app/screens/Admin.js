@@ -27,6 +27,8 @@ const Admin = () => {
 
   const [loading, setLoading] = useState(false); // State for loading indicator
   const [showPassword, setShowPassword] = useState(false); // State for hiding and showing password
+  // Email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   useEffect(() => {
     const loadFont = async () => {
@@ -42,6 +44,14 @@ const Admin = () => {
   const handleLoginPress = async () => {
     try {
       setLoading(true);
+
+      // Validate email using regex
+      if (!emailRegex.test(email)) {
+        setLoading(false);
+        Alert.alert("Lỗi", "Địa chỉ email không hợp lệ.");
+        return;
+      }
+
       // Gọi API đăng nhập sử dụng axios
       // Hash the password before sending it to the server
       const hashedPassword = await Crypto.digestStringAsync(
@@ -71,7 +81,7 @@ const Admin = () => {
 
       // Đăng nhập thành công
       console.log("Đăng nhập thành công");
-
+      console.log("Thông tin người dùng", response.data.id);
       // Thực hiện các thao tác sau khi đăng nhập thành công (ví dụ: lưu thông tin đăng nhập vào AsyncStorage, chuyển hướng đến trang AdminHome)
       await AsyncStorage.setItem("userId", response.data.id.toString());
       navigation.navigate("AdminHome");
@@ -85,7 +95,7 @@ const Admin = () => {
     } catch (error) {
       // Xử lý lỗi ở đây
       // Ví dụ: Hiển thị thông báo lỗi
-      Alert.alert("Lỗi", "Đăng nhập thất bại. Vui lòng thử lại sau.");
+      Alert.alert("Lỗi", "Đăng nhập thất bại. Kiểm tra email và mật khẩu.");
       setLoading(false);
       console.error("Lỗi khi gọi API đăng nhập", error);
     } finally {

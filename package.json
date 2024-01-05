@@ -21,9 +21,13 @@
     "axios": "^1.6.2",
     "expo": "^49.0.21",
     "expo-crypto": "~12.4.1",
+    "expo-firebase-core": "^6.0.0",
+    "expo-firebase-recaptcha": "^2.3.1",
     "expo-font": "~11.4.0",
     "expo-image-picker": "~14.3.2",
     "expo-status-bar": "~1.6.0",
+    "firebase": "^9.23.0",
+    "libphonenumber-js": "^1.10.53",
     "react": "18.2.0",
     "react-native": "^0.72.6",
     "react-native-dropdown-picker": "^5.4.6",
@@ -35,7 +39,8 @@
     "react-native-screens": "~3.22.0",
     "react-native-svg": "13.9.0",
     "react-native-toast-message": "^2.2.0",
-    "react-native-vector-icons": "^10.0.3"
+    "react-native-vector-icons": "^10.0.3",
+    "react-native-webview": "^13.6.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

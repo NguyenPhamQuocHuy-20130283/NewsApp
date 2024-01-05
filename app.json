@@ -21,7 +21,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./app/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.TTLTDD.newsapp"
     },
     "web": {
       "favicon": "./app/assets/favicon.png"
