@@ -1,158 +1,292 @@
 import React, { useState, useEffect } from "react";
 import {
+  Button,
+  Image,
   View,
-  Text,
   TextInput,
   TouchableOpacity,
+  Text,
   StyleSheet,
-  Image,
+  ScrollView,
+  SafeAreaView,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import RNPickerSelect from "react-native-picker-select";
+import { SelectList } from "react-native-dropdown-select-list";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const AddArticle = () => {
+export default function AddArticle() {
+  const [image, setImage] = useState("");
   const [title, setTitle] = useState("");
-  const [image, setImage] = useState(null);
-  const [imageDescription, setImageDescription] = useState("");
+  const [selectedItem, setSelectedItem] = useState("");
   const [content, setContent] = useState("");
-  const [category, setCategory] = useState("News");
+  const [imageDescription, setImageDescription] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Xử lý chọn ảnh từ thiết bị hoặc chụp ảnh mới
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.post(
+          "https://newsapi-springboot-production.up.railway.app/api/category/getAll"
+        );
+        setCategories(response.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+  const HandleAddArticle = async () => {
+    try {
+      setLoading(true);
+      // Check if title and image are provided
+      if (!title || !image || !selectedItem) {
+        console.error("Title, image, and category are required");
+        setLoading(false);
+        return;
+      }
+
+      // Get the userId from AsyncStorage
+      const userId = await AsyncStorage.getItem("userId");
+
+      if (!userId) {
+        console.error("User is not authenticated");
+        setLoading(false);
+        return;
+      }
+
+      // Prepare the form data for the POST request
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("content", content);
+      formData.append("authorId", userId);
+      formData.append("categoryId", selectedItem);
+      const imageType = image.split(".").pop(); // Get the file extension
+
+      formData.append("image", {
+        uri: image,
+        name: imageDescription || image.split("/").pop(), // Set the file name
+        type: `image/${imageType}`, // Set the correct MIME type based on the file extension
+      });
+      console.log("Form Data:", formData);
+
+      // Make the POST request to your API
+      const response = await axios.post(
+        "https://newsapi-springboot-production.up.railway.app/api/article/create",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Article added successfully:", response.data);
+      setLoading(false);
+      setTitle("");
+      setContent("");
+      setImageDescription("");
+      Alert.alert("Thành công", "Bài viết đã được thêm thành công");
+      // Redirect the user to the article list screen
+
+      // Example: navigation.navigate("ArticleList");
+    } catch (error) {
+      setLoading(false);
+      console.error(
+        "Error adding article:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  };
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
 
-    if (!result.cancelled) {
-      setImage(result.uri);
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
     }
   };
 
-  // Xử lý gửi bài báo
-  const submitArticle = () => {
-    // Đưa logic xử lý gửi bài báo ở đây
+  const addArticle = async () => {
+    // Perform logic to add article with title and image
     console.log("Title:", title);
-    console.log("Image:", image);
-    console.log("Image Description:", imageDescription);
+    console.log("Image URI:", image);
+    console.log("Selected category:", selectedItem);
     console.log("Content:", content);
-    console.log("Category:", category);
+    console.log("Image type:", image.split(".").pop());
+    console.log("Image name:", image.split("/").pop());
+    const userId = await AsyncStorage.getItem("userId");
+    console.log("User id:", userId);
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Tiêu đề bài báo"
-        onChangeText={(text) => setTitle(text)}
-        value={title}
-      />
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          <View style={styles.overlay}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Tiêu đề</Text>
+              <TextInput
+                style={styles.input}
+                value={title}
+                onChangeText={(text) => setTitle(text)}
+              />
+            </View>
+            <View style={styles.imagePickerContainer}>
+              <TouchableOpacity style={styles.button_image} onPress={pickImage}>
+                <Text style={styles.buttonText}>Chọn ảnh</Text>
+              </TouchableOpacity>
+              {image && (
+                <Image source={{ uri: image }} style={styles.selectedImage} />
+              )}
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Mô tả ảnh</Text>
+              <TextInput
+                style={styles.input}
+                value={imageDescription}
+                onChangeText={(text) => setImageDescription(text)}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Nội dung</Text>
+              <TextInput
+                style={styles.input_big}
+                multiline={true}
+                numberOfLines={30}
+                value={content}
+                onChangeText={(text) => setContent(text)}
+              />
+            </View>
+            <View style={styles.container}>
+              <Text style={styles.label}>Select an Item:</Text>
+              <SelectList
+                data={categories.map((category) => ({
+                  key: category.id.toString(),
+                  value: category.name,
+                }))}
+                setSelected={setSelectedItem}
+                style={styles.dropdownContainer}
+              />
+            </View>
 
-      <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
-        <Text style={styles.buttonText}>Chọn ảnh</Text>
-      </TouchableOpacity>
-
-      {image && <Image source={{ uri: image }} style={styles.imagePreview} />}
-
-      <TextInput
-        style={styles.input}
-        placeholder="Mô tả ảnh"
-        onChangeText={(text) => setImageDescription(text)}
-        value={imageDescription}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Nội dung bài báo"
-        multiline
-        onChangeText={(text) => setContent(text)}
-        value={content}
-      />
-
-      <RNPickerSelect
-        value={category}
-        onValueChange={(itemValue) => setCategory(itemValue)}
-        items={[
-          { label: "Thời sự", value: "News" },
-          { label: "Giải trí", value: "Entertainment" },
-          // Add other categories
-        ]}
-        style={pickerSelectStyles}
-      />
-
-      <TouchableOpacity style={styles.submitButton} onPress={submitArticle}>
-        <Text style={styles.buttonText}>Gửi bài báo</Text>
-      </TouchableOpacity>
-    </View>
+            <TouchableOpacity style={styles.button} onPress={HandleAddArticle}>
+              {loading ? (
+                <ActivityIndicator size="large" color="white" />
+              ) : (
+                <Text style={styles.buttonText}>Thêm bài viết</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-};
-
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    fontSize: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 4,
-    color: "black",
-    paddingRight: 30, // to ensure the text is never behind the icon
-  },
-  inputAndroid: {
-    fontSize: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderWidth: 0.5,
-    borderColor: "purple",
-    borderRadius: 8,
-    color: "black",
-    paddingRight: 30, // to ensure the text is never behind the icon
-  },
-});
+}
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1, // Đảm bảo ScrollView có thể mở rộng khi nội dung lớn hơn màn hình
+  },
   container: {
     flex: 1,
-    padding: 20,
+    fontFamily: "Inter-Bold",
+    justifyContent: "center",
+  },
+  overlay: {
+    backgroundColor: "white",
+    padding: 25,
+    marginHorizontal: 15,
+    borderRadius: 10,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  imagePickerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start", // Chỉnh căn lề về phía bên phải
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+    fontWeight: "bold",
   },
   input: {
-    height: 40,
-    borderColor: "gray",
+    height: 45,
+    borderColor: "white",
+    backgroundColor: "#F0F0F0",
     borderWidth: 1,
-    marginBottom: 20,
-    padding: 10,
-  },
-  imagePickerButton: {
-    backgroundColor: "purple",
     padding: 10,
     borderRadius: 5,
-    alignItems: "center",
   },
-  imagePreview: {
-    width: 100,
-    height: 100,
-    resizeMode: "cover",
-    marginBottom: 20,
-  },
-  picker: {
-    height: 40,
-    borderColor: "gray",
+  input_big: {
+    height: 200,
+    borderColor: "white",
+    backgroundColor: "#F0F0F0",
     borderWidth: 1,
-    marginBottom: 20,
-  },
-  submitButton: {
-    backgroundColor: "purple",
-    padding: 15,
+    padding: 10,
     borderRadius: 5,
+    textAlignVertical: "top",
+  },
+  button: {
+    backgroundColor: "#6941DE",
+    borderRadius: 5,
+    padding: 10,
     alignItems: "center",
+    width: "50%",
+    alignSelf: "center",
+    marginBottom: 10,
+    marginTop: 20,
+  },
+  button_image: {
+    backgroundColor: "#6941DE",
+    borderRadius: 5,
+    padding: 10,
+    alignItems: "center",
+    width: "30%",
+    alignSelf: "center",
+    marginBottom: 10,
+    marginRight: 10,
   },
   buttonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "bold",
   },
+  selectedImage: {
+    width: 170,
+    height: 100,
+    borderRadius: 5,
+    marginBottom: 10,
+    marginLeft: 20,
+  },
+  dropdownContainer: {
+    width: "100%",
+    marginTop: 8,
+    marginBottom: 20,
+  },
+  dropdown: {
+    backgroundColor: "#fafafa",
+    borderWidth: 1,
+    borderColor: "#ced4da",
+  },
+  dropdownItem: {
+    justifyContent: "flex-start",
+  },
+  dropdownDropdown: {
+    backgroundColor: "#fafafa",
+    borderWidth: 1,
+    borderColor: "#ced4da",
+  },
 });
-
-export default AddArticle;
