@@ -14,7 +14,7 @@ import {
 import axios from "axios";
 import Icon from "react-native-vector-icons/FontAwesome";
 import * as Crypto from "expo-crypto";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { firebaseConfig } from "../../config.js";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import firebase from "firebase/compat";
@@ -126,11 +126,6 @@ const Admin_Register = ({ navigation }) => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <FirebaseRecaptchaVerifierModal
-          ref={recaptchaVerifier}
-          firebaseConfig={firebaseConfig}
-        />
-
         <ImageBackground
           source={require("../assets/admin_login.png")}
           style={styles.imageBackground}
@@ -174,6 +169,12 @@ const Admin_Register = ({ navigation }) => {
               <TextInput
                 style={styles.input}
                 onChangeText={(text) => setPhoneNumber(text)}
+              />
+            </View>
+            <View style={styles.recaptchaContainer}>
+              <FirebaseRecaptchaVerifierModal
+                ref={recaptchaVerifier}
+                firebaseConfig={firebaseConfig}
               />
             </View>
             <TouchableOpacity
@@ -323,6 +324,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
+  },
+  recaptchaContainer: {
+    alignItems: "center",
+    marginBottom: 20, // Adjust the margin as needed
   },
 });
 export default Admin_Register;

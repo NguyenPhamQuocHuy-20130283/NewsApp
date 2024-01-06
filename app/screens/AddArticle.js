@@ -9,10 +9,11 @@ import {
   StyleSheet,
   ScrollView,
   SafeAreaView,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { SelectList } from "react-native-dropdown-select-list";
-import { Input } from "@rneui/themed/dist/Input";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -20,10 +21,10 @@ export default function AddArticle() {
   const [image, setImage] = useState("");
   const [title, setTitle] = useState("");
   const [selectedItem, setSelectedItem] = useState("");
-  const [description, setDescription] = useState("");
   const [content, setContent] = useState("");
-
+  const [imageDescription, setImageDescription] = useState("");
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,9 +42,11 @@ export default function AddArticle() {
   }, []);
   const HandleAddArticle = async () => {
     try {
+      setLoading(true);
       // Check if title and image are provided
-      if (!title || !image) {
-        console.error("Title and image are required");
+      if (!title || !image || !selectedItem) {
+        console.error("Title, image, and category are required");
+        setLoading(false);
         return;
       }
 
@@ -52,41 +55,28 @@ export default function AddArticle() {
 
       if (!userId) {
         console.error("User is not authenticated");
+        setLoading(false);
         return;
       }
-
-      // Make the POST request to get user information
-      const userResponse = await axios.post(
-        "https://newsapi-springboot-production.up.railway.app/api/admin/getUserInfo",
-        {
-          id: userId,
-        }
-      );
-
-      const user = userResponse.data;
 
       // Prepare the form data for the POST request
       const formData = new FormData();
       formData.append("title", title);
+      formData.append("content", content);
+      formData.append("authorId", userId);
+      formData.append("categoryId", selectedItem);
+      const imageType = image.split(".").pop(); // Get the file extension
+
       formData.append("image", {
         uri: image,
-        name: image.split("/").pop(),
-        type: image.split(".").pop(),
+        name: imageDescription || image.split("/").pop(), // Set the file name
+        type: `image/${imageType}`, // Set the correct MIME type based on the file extension
       });
-      formData.append("description", description);
-      formData.append("content", content);
-      formData.append("categoryId", selectedItem.key);
-
-      // Add author information to the form data
-      formData.append("author[id]", user.id);
-      formData.append("author[name]", user.name);
-      formData.append("author[email]", user.email);
-      formData.append("author[phone]", user.phone);
-      formData.append("author[role]", user.role);
+      console.log("Form Data:", formData);
 
       // Make the POST request to your API
       const response = await axios.post(
-        "https://newsapi-springboot-production.up.railway.app/api/admin/create",
+        "https://newsapi-springboot-production.up.railway.app/api/article/create",
         formData,
         {
           headers: {
@@ -96,16 +86,20 @@ export default function AddArticle() {
       );
 
       console.log("Article added successfully:", response.data);
-
-      // Reset state after adding article
+      setLoading(false);
       setTitle("");
-      setImage(null);
-      setSelectedItem(null);
+      setContent("");
+      setImageDescription("");
+      Alert.alert("Thành công", "Bài viết đã được thêm thành công");
+      // Redirect the user to the article list screen
 
-      // Optionally, navigate to a different screen or perform other actions after adding the article
       // Example: navigation.navigate("ArticleList");
     } catch (error) {
-      console.error("Error adding article:", error);
+      setLoading(false);
+      console.error(
+        "Error adding article:",
+        error.response ? error.response.data : error.message
+      );
     }
   };
 
@@ -122,17 +116,16 @@ export default function AddArticle() {
     }
   };
 
-  const addArticle = () => {
+  const addArticle = async () => {
     // Perform logic to add article with title and image
     console.log("Title:", title);
     console.log("Image URI:", image);
     console.log("Selected category:", selectedItem);
-    console.log("Description:", description);
     console.log("Content:", content);
-
-    // Reset state after adding article
-    setTitle("");
-    setImage(null);
+    console.log("Image type:", image.split(".").pop());
+    console.log("Image name:", image.split("/").pop());
+    const userId = await AsyncStorage.getItem("userId");
+    console.log("User id:", userId);
   };
 
   return (
@@ -157,11 +150,11 @@ export default function AddArticle() {
               )}
             </View>
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Mô tả</Text>
-              <Input
+              <Text style={styles.label}>Mô tả ảnh</Text>
+              <TextInput
                 style={styles.input}
-                value={description}
-                onChangeText={(text) => setDescription(text)}
+                value={imageDescription}
+                onChangeText={(text) => setImageDescription(text)}
               />
             </View>
             <View style={styles.inputContainer}>
@@ -187,7 +180,11 @@ export default function AddArticle() {
             </View>
 
             <TouchableOpacity style={styles.button} onPress={HandleAddArticle}>
-              <Text style={styles.buttonText}>Thêm bài viết</Text>
+              {loading ? (
+                <ActivityIndicator size="large" color="white" />
+              ) : (
+                <Text style={styles.buttonText}>Thêm bài viết</Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>

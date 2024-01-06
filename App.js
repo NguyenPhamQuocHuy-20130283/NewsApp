@@ -10,6 +10,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Alert } from "react-native";
 import Toast from "react-native-toast-message";
+import My_news from "./app/screens/My_news";
 const Stack = createStackNavigator();
 
 const App = () => {
@@ -41,7 +42,6 @@ const App = () => {
               />
             </TouchableOpacity>
           ),
-          headerTitle: null, // Ẩn tiêu đề
         }}
       >
         <Stack.Screen
@@ -102,7 +102,22 @@ const App = () => {
             ),
           }}
         />
-        <Stack.Screen name="AddArticle" component={AddArticle} />
+        <Stack.Screen
+          name="AddArticle"
+          component={AddArticle}
+          options={{
+            title: "Thêm bài viết",
+            headerShown: true,
+          }}
+        />
+        <Stack.Screen
+          name="My_news"
+          component={My_news}
+          options={{
+            title: "Danh sách bài viết của tôi",
+            headerShown: true,
+          }}
+        />
       </Stack.Navigator>
       <Toast />
     </NavigationContainer>
