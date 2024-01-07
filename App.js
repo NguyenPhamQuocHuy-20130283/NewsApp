@@ -6,11 +6,13 @@ import Admin from "./app/screens/Admin";
 import AdminHome from "./app/screens/AdminHome";
 import AddArticle from "./app/screens/AddArticle";
 import Admin_Register from "./app/screens/Admin_Register";
+import ArticleListScreen from "./app/screens/ArticleListScreen";
+import ArticleDetailScreen from "./app/screens/ArticleDetailScreen";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Alert } from "react-native";
 import Toast from "react-native-toast-message";
-import ArticleListScreen from "./app/screens/ArticleListScreen";
+
 const Stack = createStackNavigator();
 
 const App = () => {
@@ -115,6 +117,14 @@ const App = () => {
           component={ArticleListScreen}
           options={{
             title: "Danh sách bài viết của tôi",
+            headerShown: true,
+          }}
+        />
+        <Stack.Screen
+          name="ArticleDetailScreen"
+          component={ArticleDetailScreen}
+          options={{
+            title: "Chi tiết bài viết",
             headerShown: true,
           }}
         />

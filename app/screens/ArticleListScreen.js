@@ -15,35 +15,40 @@ import {
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { useNavigation } from "@react-navigation/native";
 const ArticleListScreen = () => {
   const [activeTab, setActiveTab] = useState("all"); // "all", "pending", "published", "rejected"
   const [searchText, setSearchText] = useState("");
-
+  const navigation = useNavigation();
   const articles = [
     {
-      id: 1,
+      id: 10,
       title: "Bài viết 1",
+      category: "Thể thao",
       summary: "Tóm tắt bài viết 1",
       status: "pending",
       image: require("../assets/add_news.png"), // replace with actual image source
     },
     {
-      id: 2,
+      id: 11,
       title: "Bài viết 2",
+      category: "Thể thao",
       summary: "Tóm tắt bài viết 1",
       status: "published",
       image: require("../assets/add_news.png"), // replace with actual image source
     },
     {
-      id: 3,
+      id: 12,
       title: "Bài viết 2",
+      category: "Thể thao",
       summary: "Tóm tắt bài viết 1",
       status: "rejected",
       image: require("../assets/add_news.png"), // replace with actual image source
     },
     {
-      id: 4,
+      id: 13,
       title: "Bài viết 2",
+      category: "Thể thao",
       summary: "Tóm tắt bài viết 1",
       status: "",
       image: require("../assets/add_news.png"), // replace with actual image source
@@ -53,23 +58,29 @@ const ArticleListScreen = () => {
 
   const renderArticle = (article) => {
     const statusColor = getStatusColor(article.status);
-
+    const navigateToDetail = () => {
+      // Navigate to the ArticleDetailScreen and pass the article id
+      console.log(`Navigate to article detail screen: ${article.id}`);
+      navigation.navigate("ArticleDetailScreen", { articleId: article.id });
+    };
     return (
-      <View
-        key={article.id}
-        style={[styles.articleContainer, { backgroundColor: statusColor }]}
-      >
-        <Image source={article.image} style={styles.articleImage} />
-        <View style={styles.articleDetails}>
-          <Text style={styles.articleTitle}>{article.title}</Text>
-          <Text style={styles.articleSummary}>{article.summary}</Text>
-          <View style={styles.statusContainer}>
-            <Text style={styles.statusLabelText}>
-              {getStatusText(article.status)}
-            </Text>
+      <TouchableOpacity key={article.id} onPress={navigateToDetail}>
+        <View
+          key={article.id}
+          style={[styles.articleContainer, { backgroundColor: statusColor }]}
+        >
+          <Image source={article.image} style={styles.articleImage} />
+          <View style={styles.articleDetails}>
+            <Text style={styles.articleTitle}>{article.title}</Text>
+            <Text style={styles.articleSummary}>{article.summary}</Text>
+            <View style={styles.statusContainer}>
+              <Text style={styles.statusLabelText}>
+                {getStatusText(article.status)}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
