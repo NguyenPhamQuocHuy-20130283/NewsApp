@@ -19,6 +19,7 @@ import { firebaseConfig } from "../../config.js";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import firebase from "firebase/compat";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+
 const Admin_Register = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -37,7 +37,7 @@ const AdminHome = () => {
                 style={styles.button}
                 onPress={() => {
                   // Xử lý khi nhấn vào nút tiện ích nhà báo
-                  navigation.navigate("My_news");
+                  navigation.navigate("ArticleListScreen");
                 }}
               >
                 <Image source={require("../assets/list_news.png")} />
