@@ -121,7 +121,7 @@ const ArticleDetailScreen = ({ route }) => {
 const formatDate = (timestamp) => {
   const date = new Date(timestamp);
   const day = date.getDate();
-  const month = date.getMonth() + 1; // Months are zero-based
+  const month = date.getMonth() + 1;
   const year = date.getFullYear();
 
   return `Ngày ${day}/${month}/${year}`;
