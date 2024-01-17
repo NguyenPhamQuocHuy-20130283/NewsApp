@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Image,
@@ -17,62 +17,50 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 const ArticleListScreen = () => {
-  const [activeTab, setActiveTab] = useState("all"); // "all", "pending", "published", "rejected"
+  const [activeTab, setActiveTab] = useState("all"); // "all", "PENDING", "PUBLISHED", "CANCEL"
   const [searchText, setSearchText] = useState("");
+  const [articles, setArticles] = useState([]);
   const navigation = useNavigation();
-  const articles = [
-    {
-      id: 10,
-      title: "Bài viết 1",
-      category: "Thể thao",
-      summary: "Tóm tắt bài viết 1",
-      status: "pending",
-      image: require("../assets/add_news.png"), // replace with actual image source
-    },
-    {
-      id: 11,
-      title: "Bài viết 2",
-      category: "Thể thao",
-      summary: "Tóm tắt bài viết 1",
-      status: "published",
-      image: require("../assets/add_news.png"), // replace with actual image source
-    },
-    {
-      id: 12,
-      title: "Bài viết 2",
-      category: "Thể thao",
-      summary: "Tóm tắt bài viết 1",
-      status: "rejected",
-      image: require("../assets/add_news.png"), // replace with actual image source
-    },
-    {
-      id: 13,
-      title: "Bài viết 2",
-      category: "Thể thao",
-      summary: "Tóm tắt bài viết 1",
-      status: "",
-      image: require("../assets/add_news.png"), // replace with actual image source
-    },
-    // Add more articles as needed
-  ];
+  const getUserId = async () => {
+    const userId = await AsyncStorage.getItem("userId");
+    console.log("User ID:", userId);
+    return userId;
+  };
+  const fetchArticlesByAuthorId = async () => {
+    try {
+      const userId = await getUserId();
+      const response = await axios.post(
+        "https://newsapi-springboot-production.up.railway.app/api/article/getByAuthorId",
+        { id: userId }
+      );
+      setArticles(response.data);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchArticlesByAuthorId();
+  }, []);
 
   const renderArticle = (article) => {
     const statusColor = getStatusColor(article.status);
     const navigateToDetail = () => {
-      // Navigate to the ArticleDetailScreen and pass the article id
       console.log(`Navigate to article detail screen: ${article.id}`);
       navigation.navigate("ArticleDetailScreen", { articleId: article.id });
     };
+    const summary = article.content.substring(0, 100);
+
     return (
       <TouchableOpacity key={article.id} onPress={navigateToDetail}>
         <View
           key={article.id}
           style={[styles.articleContainer, { backgroundColor: statusColor }]}
         >
-          <Image source={article.image} style={styles.articleImage} />
+          <Image source={{ uri: article.image }} style={styles.articleImage} />
           <View style={styles.articleDetails}>
             <Text style={styles.articleTitle}>{article.title}</Text>
-            <Text style={styles.articleSummary}>{article.summary}</Text>
+            <Text style={styles.articleSummary}>{summary}</Text>
             <View style={styles.statusContainer}>
               <Text style={styles.statusLabelText}>
                 {getStatusText(article.status)}
@@ -86,11 +74,11 @@ const ArticleListScreen = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "pending":
+      case "PENDING":
         return "#F9FFB4"; // yellow
-      case "published":
+      case "PUBLISHED":
         return "#D6FFE4"; // green
-      case "rejected":
+      case "CANCEL":
         return "#FFD6D6"; // red
       default:
         return "#F0F0F0"; // black (default color)
@@ -99,11 +87,11 @@ const ArticleListScreen = () => {
 
   const getStatusText = (status) => {
     switch (status) {
-      case "pending":
+      case "PENDING":
         return "Chờ duyệt";
-      case "published":
+      case "PUBLISHED":
         return "Đã duyệt";
-      case "rejected":
+      case "CANCEL":
         return "Không duyệt";
       default:
         return "Không xác định";
@@ -139,20 +127,20 @@ const ArticleListScreen = () => {
             Tất cả
           </Text>
           <Text
-            style={[styles.tab, activeTab === "pending" && styles.activeTab]}
-            onPress={() => setActiveTab("pending")}
+            style={[styles.tab, activeTab === "PENDING" && styles.activeTab]}
+            onPress={() => setActiveTab("PENDING")}
           >
             Chờ duyệt
           </Text>
           <Text
-            style={[styles.tab, activeTab === "published" && styles.activeTab]}
-            onPress={() => setActiveTab("published")}
+            style={[styles.tab, activeTab === "PUBLISHED" && styles.activeTab]}
+            onPress={() => setActiveTab("PUBLISHED")}
           >
             Đã duyệt
           </Text>
           <Text
-            style={[styles.tab, activeTab === "rejected" && styles.activeTab]}
-            onPress={() => setActiveTab("rejected")}
+            style={[styles.tab, activeTab === "CANCEL" && styles.activeTab]}
+            onPress={() => setActiveTab("CANCEL")}
           >
             Không duyệt
           </Text>

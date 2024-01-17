@@ -7,13 +7,44 @@ import {
   StyleSheet,
   Image,
   SafeAreaView,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 const AdminHome = () => {
   const navigation = useNavigation();
 
-  const handleAddArticle = () => {
+  const getUserId = async () => {
+    const userId = await AsyncStorage.getItem("userId");
+    console.log("User ID:", userId);
+    return userId;
+  };
+  const getRoleId = async () => {
+    try {
+      const response = await axios.post(
+        "https://newsapi-springboot-production.up.railway.app/api/admin/find",
+        {
+          id: await getUserId(),
+        }
+      );
+      const roleId = response.data.role;
+      console.log("Role ID:", roleId);
+      return roleId;
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Lỗi", "Không thể lấy thông tin người dùng.");
+    }
+  };
+
+  const handleAddArticle = async () => {
     // Chuyển hướng sang trang AddArticle
+    const userId = await getUserId();
+    // Use the userId as needed
+    console.log("User ID inside handleAddArticle:", userId);
+    const roleId = await getRoleId();
+    // Use the roleId as needed
+    console.log("Role ID inside handleAddArticle:", roleId);
     navigation.navigate("AddArticle");
   };
   return (

@@ -40,6 +40,11 @@ export default function AddArticle() {
 
     fetchData();
   }, []);
+  const getUserId = async () => {
+    const userId = await AsyncStorage.getItem("userId");
+    console.log("User ID:", userId);
+    return userId;
+  };
   const HandleAddArticle = async () => {
     try {
       setLoading(true);
@@ -51,7 +56,7 @@ export default function AddArticle() {
       }
 
       // Get the userId from AsyncStorage
-      const userId = await AsyncStorage.getItem("userId");
+      const userId = await getUserId();
 
       if (!userId) {
         console.error("User is not authenticated");

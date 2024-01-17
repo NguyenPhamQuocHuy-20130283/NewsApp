@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import {
   View,
@@ -11,32 +11,35 @@ import {
   Modal,
   TouchableHighlight,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
+
 const ArticleDetailScreen = ({ route }) => {
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const { articleId } = route.params;
   const [article, setArticle] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
-  useEffect(() => {
-    const fetchArticle = async () => {
-      try {
-        const response = await axios.post(
-          "https://newsapi-springboot-production.up.railway.app/api/article/getById",
-          { id: articleId },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        setArticle(response.data);
-      } catch (error) {
-        console.error("Error fetching article:", error);
-      }
-    };
 
-    fetchArticle();
+  const fetchArticle = useCallback(async () => {
+    try {
+      const response = await axios.post(
+        "https://newsapi-springboot-production.up.railway.app/api/article/getById",
+        { id: articleId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setArticle(response.data);
+    } catch (error) {
+      console.error("Error fetching article:", error);
+    }
   }, [articleId]);
+
+  useEffect(() => {
+    fetchArticle();
+  }, [fetchArticle, isFocused]);
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
@@ -47,18 +50,42 @@ const ArticleDetailScreen = ({ route }) => {
     toggleModal();
   };
 
+  const handleReject = () => {
+    // Update the status to "REJECTED" through API call
+    updateArticleStatus("CANCEL");
+  };
+
+  const updateArticleStatus = async (status) => {
+    try {
+      await axios.post(
+        "https://newsapi-springboot-production.up.railway.app/api/article/updateStatus",
+        { id: articleId, status },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Alert user about the status change
+      Alert.alert(
+        `Article ${status}`,
+        `Article ${article.title} is now ${status}.`
+      );
+
+      // Navigate back and refresh the previous screen
+      navigation.goBack();
+    } catch (error) {
+      console.error("Error updating article status:", error);
+    }
+  };
+
   const handleConfirmApprove = () => {
-    // Implement your approval logic here
-    Alert.alert("Article Approved", `Article ${article.title} is approved.`);
-    navigation.goBack();
+    // Update the status to "APPROVED" through API call
+    updateArticleStatus("PUBLISHED");
     // Close the modal after approving
     toggleModal();
   };
-
-  const handleReject = () => {
-    Alert.alert("Article Rejected", `Article ${article.title} is rejected.`);
-  };
-
   return (
     <View style={styles.container}>
       <ScrollView>
