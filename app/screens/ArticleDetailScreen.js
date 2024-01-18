@@ -10,6 +10,7 @@ import {
   Alert,
   Modal,
   TouchableHighlight,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 
@@ -19,6 +20,7 @@ const ArticleDetailScreen = ({ route }) => {
   const { articleId } = route.params;
   const [article, setArticle] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchArticle = useCallback(async () => {
     try {
@@ -57,6 +59,7 @@ const ArticleDetailScreen = ({ route }) => {
 
   const updateArticleStatus = async (status) => {
     try {
+      setIsLoading(true);
       await axios.post(
         "https://newsapi-springboot-production.up.railway.app/api/article/updateStatus",
         { id: articleId, status },
@@ -77,6 +80,7 @@ const ArticleDetailScreen = ({ route }) => {
       navigation.goBack();
     } catch (error) {
       console.error("Error updating article status:", error);
+      setIsLoading(false);
     }
   };
 
@@ -134,12 +138,26 @@ const ArticleDetailScreen = ({ route }) => {
         </View>
       </Modal>
       <View style={styles.buttonsContainer}>
-        <TouchableOpacity style={styles.approveButton} onPress={handleApprove}>
-          <Text style={styles.buttonText}>Duyệt</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.rejectButton} onPress={handleReject}>
-          <Text style={styles.buttonText}>Không duyệt</Text>
-        </TouchableOpacity>
+        {isLoading ? (
+          <View style={styles.activityIndicatorContainer}>
+            <ActivityIndicator size="extra-large" color="#6941DE" />
+          </View>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={styles.approveButton}
+              onPress={handleApprove}
+            >
+              <Text style={styles.buttonText}>Duyệt</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.rejectButton}
+              onPress={handleReject}
+            >
+              <Text style={styles.buttonText}>Không duyệt</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     </View>
   );
@@ -250,6 +268,12 @@ const styles = StyleSheet.create({
   modalButtonText: {
     fontWeight: "bold",
     textAlign: "center",
+  },
+  activityIndicatorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
   },
 });
 

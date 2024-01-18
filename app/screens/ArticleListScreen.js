@@ -15,7 +15,7 @@ import {
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 const ArticleListScreen = () => {
   const [activeTab, setActiveTab] = useState("all"); // "all", "PENDING", "PUBLISHED", "CANCEL"
   const [searchText, setSearchText] = useState("");
@@ -39,9 +39,12 @@ const ArticleListScreen = () => {
     }
   };
 
-  useEffect(() => {
-    fetchArticlesByAuthorId();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      // This function will be called when the screen is focused
+      fetchArticlesByAuthorId();
+    }, [])
+  );
 
   const renderArticle = (article) => {
     const statusColor = getStatusColor(article.status);
