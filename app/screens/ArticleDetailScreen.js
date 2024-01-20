@@ -82,7 +82,7 @@ const ArticleDetailScreen = ({ route }) => {
 
   const handleReject = () => {
     // Update the status to "REJECTED" through API call
-    updateArticleStatus("CANCEL");
+    updateArticleStatus("cancel");
   };
 
   const updateArticleStatus = async (status) => {
@@ -114,7 +114,7 @@ const ArticleDetailScreen = ({ route }) => {
 
   const handleConfirmApprove = () => {
     // Update the status to "APPROVED" through API call
-    updateArticleStatus("PUBLISHED");
+    updateArticleStatus("published");
     // Close the modal after approving
     toggleModal();
   };
