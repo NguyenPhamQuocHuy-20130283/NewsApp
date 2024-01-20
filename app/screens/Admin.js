@@ -61,7 +61,7 @@ const Admin = () => {
       const response = await axios.post(
         "https://newsapi-springboot-production.up.railway.app/api/admin/login",
         {
-          email,
+          email: email,
           password: hashedPassword,
         },
         {
