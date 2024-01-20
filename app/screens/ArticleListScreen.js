@@ -21,6 +21,7 @@ const ArticleListScreen = () => {
   const [searchText, setSearchText] = useState("");
   const [articles, setArticles] = useState([]);
   const navigation = useNavigation();
+
   const getUserId = async () => {
     const userId = await AsyncStorage.getItem("userId");
     console.log("User ID:", userId);

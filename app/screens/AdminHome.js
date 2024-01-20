@@ -1,5 +1,5 @@
 // Trong AdminHome.js
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,37 +14,37 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 const AdminHome = () => {
   const navigation = useNavigation();
+  const [userRoleId, setUserRoleId] = useState("");
 
   const getUserId = async () => {
     const userId = await AsyncStorage.getItem("userId");
     console.log("User ID:", userId);
     return userId;
   };
-  const getRoleId = async () => {
-    try {
-      const response = await axios.post(
-        "https://newsapi-springboot-production.up.railway.app/api/admin/find",
-        {
-          id: await getUserId(),
-        }
-      );
-      const roleId = response.data.role;
-      console.log("Role ID:", roleId);
-      return roleId;
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Lỗi", "Không thể lấy thông tin người dùng.");
-    }
-  };
+
+  useEffect(() => {
+    const fetchRoleId = async () => {
+      try {
+        const response = await axios.post(
+          "https://newsapi-springboot-production.up.railway.app/api/admin/find",
+          {
+            id: await getUserId(),
+          }
+        );
+        setUserRoleId(response.data.role);
+        console.log("role id", response.data.role); // Log the updated value
+      } catch (error) {
+        console.log(error);
+        Alert.alert("Error", "Could not fetch user role.");
+      }
+    };
+
+    fetchRoleId();
+  }, []);
 
   const handleAddArticle = async () => {
     // Chuyển hướng sang trang AddArticle
-    const userId = await getUserId();
-    // Use the userId as needed
-    console.log("User ID inside handleAddArticle:", userId);
-    const roleId = await getRoleId();
-    // Use the roleId as needed
-    console.log("Role ID inside handleAddArticle:", roleId);
+
     navigation.navigate("AddArticle");
   };
   return (
@@ -79,21 +79,26 @@ const AdminHome = () => {
           </View>
 
           {/* Section 2: Tiện ích quản trị viên */}
-          <View style={(styles.section, styles.sectionAdmin)}>
-            <Text style={styles.sectionTitle}>Tiện ích quản trị viên</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.button_1item}
-                onPress={() => {
-                  // Xử lý khi nhấn vào nút quản lý bài viết
-                }}
-              >
-                <Image source={require("../assets/list_news.png")} />
-                <Text style={styles.button_text}>Bài viết của tôi</Text>
-              </TouchableOpacity>
-            </View>
-            {/* Thêm các nút khác tương tự nếu cần */}
-          </View>
+          {userRoleId === 1 && (
+            <>
+              <View style={(styles.section, styles.sectionAdmin)}>
+                <Text style={styles.sectionTitle}>Tiện ích quản trị viên</Text>
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={styles.button_1item}
+                    onPress={() => {
+                      // Xử lý khi nhấn vào nút quản lý bài viết
+                      navigation.navigate("ArticleListScreen");
+                    }}
+                  >
+                    <Image source={require("../assets/list_news.png")} />
+                    <Text style={styles.button_text}>Quản lý bài viết</Text>
+                  </TouchableOpacity>
+                </View>
+                {/* Thêm các nút khác tương tự nếu cần */}
+              </View>
+            </>
+          )}
         </View>
       </View>
     </SafeAreaView>

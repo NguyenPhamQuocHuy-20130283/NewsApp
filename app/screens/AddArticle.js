@@ -16,6 +16,7 @@ import * as ImagePicker from "expo-image-picker";
 import { SelectList } from "react-native-dropdown-select-list";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
 export default function AddArticle() {
   const [image, setImage] = useState("");
@@ -25,6 +26,7 @@ export default function AddArticle() {
   const [imageDescription, setImageDescription] = useState("");
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,7 +99,7 @@ export default function AddArticle() {
       setImageDescription("");
       Alert.alert("Thành công", "Bài viết đã được thêm thành công");
       // Redirect the user to the article list screen
-
+      navigation.goBack();
       // Example: navigation.navigate("ArticleList");
     } catch (error) {
       setLoading(false);

@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ArticleDetailScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -21,6 +22,7 @@ const ArticleDetailScreen = ({ route }) => {
   const [article, setArticle] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [userRoleId, setUserRoleId] = useState("");
 
   const fetchArticle = useCallback(async () => {
     try {
@@ -35,13 +37,39 @@ const ArticleDetailScreen = ({ route }) => {
       );
       setArticle(response.data);
     } catch (error) {
-      console.error("Error fetching article:", error);
+      console.log("Error fetching article:", error);
     }
   }, [articleId]);
 
   useEffect(() => {
     fetchArticle();
   }, [fetchArticle, isFocused]);
+
+  useEffect(() => {
+    const fetchRoleId = async () => {
+      try {
+        const response = await axios.post(
+          "https://newsapi-springboot-production.up.railway.app/api/admin/find",
+          {
+            id: await getUserId(),
+          }
+        );
+        setUserRoleId(response.data.role);
+        console.log("role id", response.data.role); // Log the updated value
+      } catch (error) {
+        console.log(error);
+        Alert.alert("Error", "Could not fetch user role.");
+      }
+    };
+
+    fetchRoleId();
+  }, []);
+
+  const getUserId = async () => {
+    const userId = await AsyncStorage.getItem("userId");
+    console.log("User ID:", userId);
+    return userId;
+  };
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
@@ -144,18 +172,22 @@ const ArticleDetailScreen = ({ route }) => {
           </View>
         ) : (
           <>
-            <TouchableOpacity
-              style={styles.approveButton}
-              onPress={handleApprove}
-            >
-              <Text style={styles.buttonText}>Duyệt</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.rejectButton}
-              onPress={handleReject}
-            >
-              <Text style={styles.buttonText}>Không duyệt</Text>
-            </TouchableOpacity>
+            {userRoleId === 1 && ( // Render only if the user is an admin (roleId === 1)
+              <>
+                <TouchableOpacity
+                  style={styles.approveButton}
+                  onPress={handleApprove}
+                >
+                  <Text style={styles.buttonText}>Duyệt</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.rejectButton}
+                  onPress={handleReject}
+                >
+                  <Text style={styles.buttonText}>Không duyệt</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </>
         )}
       </View>
