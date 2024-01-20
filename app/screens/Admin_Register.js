@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { StrictMode, useState } from "react";
 import {
   View,
   Text,
@@ -10,11 +10,13 @@ import {
   SafeAreaView,
   Modal,
   ActivityIndicator,
+  ScrollView,
+  Linking,
 } from "react-native";
 import axios from "axios";
 import Icon from "react-native-vector-icons/FontAwesome";
 import * as Crypto from "expo-crypto";
-
+import { Picker } from "@react-native-picker/picker";
 import { firebaseConfig } from "../../config.js";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import firebase from "firebase/compat";
@@ -29,9 +31,12 @@ const Admin_Register = ({ navigation }) => {
   const [verificationId, setVerificationId] = useState(null);
   const recaptchaVerifier = React.useRef(null);
   const [showPassword, setShowPassword] = useState(false); // State for hiding and showing password
+  const [userType, setUserType] = useState("author"); // Mặc định là author
+
   const [loading, setLoading] = useState(false); // State for loading indicator
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const vietnamesePhoneNumberRegex = /^(0[23456789]|84[23456789])(\d{8})$/;
+  //sendmail
 
   const handleSendVerificationCode = async () => {
     try {
@@ -103,10 +108,10 @@ const Admin_Register = ({ navigation }) => {
           email: email,
           password: hashedPassword,
           phone: phoneNumber,
-          role: 1,
+          role: userType === "admin" ? 1 : 0,
         }
       );
-
+      sendEmail();
       // Xử lý response ở đây nếu cần
       console.log(response.data);
       Alert.alert("Thông báo", "Đăng ký thành công! Quay lại trang đăng nhập");
@@ -125,108 +130,122 @@ const Admin_Register = ({ navigation }) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <ImageBackground
-          source={require("../assets/admin_login.png")}
-          style={styles.imageBackground}
-        >
-          <View style={styles.overlay}>
-            <Text style={styles.loginText}>Đăng ký</Text>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={(text) => setEmail(text)}
-              />
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={styles.container}>
+          <ImageBackground
+            source={require("../assets/admin_login.png")}
+            style={styles.imageBackground}
+          >
+            <View style={styles.overlay}>
+              <Text style={styles.loginText}>Đăng ký</Text>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Email</Text>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={(text) => setEmail(text)}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Mật khẩu</Text>
+                <TextInput
+                  style={styles.input}
+                  secureTextEntry={!showPassword}
+                  onChangeText={(text) => setPassword(text)}
+                />
+                <TouchableOpacity
+                  style={styles.iconContainer}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Icon
+                    name={showPassword ? "eye-slash" : "eye"}
+                    size={20}
+                    color="black"
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Tên</Text>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={(text) => setName(text)}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Số điện thoại</Text>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={(text) => setPhoneNumber(text)}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Loại người dùng</Text>
+                <Picker
+                  selectedValue={userType}
+                  onValueChange={(itemValue) => setUserType(itemValue)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Author" value="author" />
+                  <Picker.Item label="Admin" value="admin" />
+                </Picker>
+              </View>
+
+              <View style={styles.recaptchaContainer}>
+                <FirebaseRecaptchaVerifierModal
+                  ref={recaptchaVerifier}
+                  firebaseConfig={firebaseConfig}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleSendVerificationCode}
+              >
+                {loading ? (
+                  <ActivityIndicator size="large" color="white" />
+                ) : (
+                  <Text style={styles.buttonText}>Đăng kí</Text>
+                )}
+              </TouchableOpacity>
+              <View style={styles.registerContainer}>
+                <Text style={styles.registerText}>Đã có tài khoản?</Text>
+                <TouchableOpacity onPress={() => navigation.navigate("Admin")}>
+                  <Text style={styles.registerLink}>Đăng nhập</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Mật khẩu</Text>
+          </ImageBackground>
+        </View>
+
+        {/* Modal */}
+        <Modal
+          visible={isCodeModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => {
+            setIsCodeModalVisible(false);
+          }}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Nhập mã code</Text>
               <TextInput
                 style={styles.input}
-                secureTextEntry={!showPassword}
-                onChangeText={(text) => setPassword(text)}
+                placeholder="Nhập mã code"
+                onChangeText={(text) => setCode(text)}
               />
               <TouchableOpacity
-                style={styles.iconContainer}
-                onPress={() => setShowPassword(!showPassword)}
+                style={styles.button}
+                onPress={() => {
+                  setIsCodeModalVisible(false);
+                  // Gọi hàm xác nhận mã code
+                  confirmCode();
+                }}
               >
-                <Icon
-                  name={showPassword ? "eye-slash" : "eye"}
-                  size={20}
-                  color="black"
-                />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Tên</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={(text) => setName(text)}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Số điện thoại</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={(text) => setPhoneNumber(text)}
-              />
-            </View>
-            <View style={styles.recaptchaContainer}>
-              <FirebaseRecaptchaVerifierModal
-                ref={recaptchaVerifier}
-                firebaseConfig={firebaseConfig}
-              />
-            </View>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleSendVerificationCode}
-            >
-              {loading ? (
-                <ActivityIndicator size="large" color="white" />
-              ) : (
-                <Text style={styles.buttonText}>Đăng kí</Text>
-              )}
-            </TouchableOpacity>
-            <View style={styles.registerContainer}>
-              <Text style={styles.registerText}>Đã có tài khoản?</Text>
-              <TouchableOpacity onPress={() => navigation.navigate("Admin")}>
-                <Text style={styles.registerLink}>Đăng nhập</Text>
+                <Text style={styles.buttonText}>Xác nhận</Text>
               </TouchableOpacity>
             </View>
           </View>
-        </ImageBackground>
-      </View>
-
-      {/* Modal */}
-      <Modal
-        visible={isCodeModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => {
-          setIsCodeModalVisible(false);
-        }}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Nhập mã code</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nhập mã code"
-              onChangeText={(text) => setCode(text)}
-            />
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                setIsCodeModalVisible(false);
-                // Gọi hàm xác nhận mã code
-                confirmCode();
-              }}
-            >
-              <Text style={styles.buttonText}>Xác nhận</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        </Modal>
+      </ScrollView>
       {/* end of modal */}
     </SafeAreaView>
   );
