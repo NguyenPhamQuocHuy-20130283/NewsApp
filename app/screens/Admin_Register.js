@@ -16,7 +16,6 @@ import {
 import axios from "axios";
 import Icon from "react-native-vector-icons/FontAwesome";
 import * as Crypto from "expo-crypto";
-import { Picker } from "@react-native-picker/picker";
 import { firebaseConfig } from "../../config.js";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import firebase from "firebase/compat";
@@ -31,8 +30,6 @@ const Admin_Register = ({ navigation }) => {
   const [verificationId, setVerificationId] = useState(null);
   const recaptchaVerifier = React.useRef(null);
   const [showPassword, setShowPassword] = useState(false); // State for hiding and showing password
-  const [userType, setUserType] = useState("author"); // Mặc định là author
-
   const [loading, setLoading] = useState(false); // State for loading indicator
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const vietnamesePhoneNumberRegex = /^(0[23456789]|84[23456789])(\d{8})$/;
@@ -108,10 +105,9 @@ const Admin_Register = ({ navigation }) => {
           email: email,
           password: hashedPassword,
           phone: phoneNumber,
-          role: userType === "admin" ? 1 : 0,
+          role: 0, //0: author, 1: admin
         }
       );
-      sendEmail();
       // Xử lý response ở đây nếu cần
       console.log(response.data);
       Alert.alert("Thông báo", "Đăng ký thành công! Quay lại trang đăng nhập");
@@ -176,17 +172,6 @@ const Admin_Register = ({ navigation }) => {
                   style={styles.input}
                   onChangeText={(text) => setPhoneNumber(text)}
                 />
-              </View>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Loại người dùng</Text>
-                <Picker
-                  selectedValue={userType}
-                  onValueChange={(itemValue) => setUserType(itemValue)}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Author" value="author" />
-                  <Picker.Item label="Admin" value="admin" />
-                </Picker>
               </View>
 
               <View style={styles.recaptchaContainer}>

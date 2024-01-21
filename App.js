@@ -8,6 +8,8 @@ import AddArticle from "./app/screens/AddArticle";
 import Admin_Register from "./app/screens/Admin_Register";
 import ArticleListScreen from "./app/screens/ArticleListScreen";
 import ArticleDetailScreen from "./app/screens/ArticleDetailScreen";
+import PasswordChangeScreen from "./app/screens/PasswordChangeScreen";
+
 import Icon from "react-native-vector-icons/FontAwesome";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Alert } from "react-native";
@@ -30,20 +32,6 @@ const App = () => {
           headerTitleStyle: {
             fontWeight: "bold",
           },
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => {
-                // Xử lý khi nhấn vào icon (ví dụ: mở menu quản trị viên)
-              }}
-            >
-              <Icon
-                name="bars"
-                size={30}
-                color="white"
-                style={{ marginRight: 10 }}
-              />
-            </TouchableOpacity>
-          ),
         }}
       >
         <Stack.Screen
@@ -102,6 +90,50 @@ const App = () => {
                 </TouchableOpacity>
               )
             ),
+            headerRight: ({ navigation }) => (
+              (navigation = useNavigation()),
+              (
+                <TouchableOpacity
+                  onPress={() => {
+                    Alert.alert(
+                      "Chọn hành động",
+                      "Chọn một trong những tùy chọn sau:",
+                      [
+                        {
+                          text: "Đổi mật khẩu",
+                          onPress: () => {
+                            // Handle the "Đổi mật khẩu" action
+                            console.log("Đổi mật khẩu");
+                            navigation.navigate("ChangePassword");
+                          },
+                        },
+                        {
+                          text: "Đăng xuất",
+                          onPress: () => {
+                            // Handle the "Đăng xuất" action
+                            navigation.navigate("Admin");
+                            console.log("Đăng xuất");
+                          },
+                        },
+                        {
+                          text: "Hủy",
+                          onPress: () => console.log("Hủy"),
+                          style: "cancel",
+                        },
+                      ],
+                      { cancelable: true }
+                    );
+                  }}
+                >
+                  <Icon
+                    name="bars"
+                    size={30}
+                    color="white"
+                    style={{ marginRight: 10 }}
+                  />
+                </TouchableOpacity>
+              )
+            ),
           }}
         />
         <Stack.Screen
@@ -125,6 +157,14 @@ const App = () => {
           component={ArticleDetailScreen}
           options={{
             title: "Chi tiết bài viết",
+            headerShown: true,
+          }}
+        />
+        <Stack.Screen
+          name="ChangePassword"
+          component={PasswordChangeScreen}
+          options={{
+            title: "Change Password",
             headerShown: true,
           }}
         />

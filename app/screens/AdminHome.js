@@ -18,6 +18,7 @@ const AdminHome = () => {
 
   const getUserId = async () => {
     const userId = await AsyncStorage.getItem("userId");
+
     console.log("User ID:", userId);
     return userId;
   };
@@ -45,7 +46,7 @@ const AdminHome = () => {
   const handleAddArticle = async () => {
     // Chuyển hướng sang trang AddArticle
 
-    navigation.navigate("AddArticle");
+    navigation.navigate("AddArticle", { userId: await getUserId() });
   };
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -68,7 +69,9 @@ const AdminHome = () => {
                 style={styles.button}
                 onPress={() => {
                   // Xử lý khi nhấn vào nút tiện ích nhà báo
-                  navigation.navigate("ArticleListScreen");
+                  navigation.navigate("ArticleListScreen", {
+                    roleId: 0,
+                  });
                 }}
               >
                 <Image source={require("../assets/list_news.png")} />
@@ -88,7 +91,9 @@ const AdminHome = () => {
                     style={styles.button_1item}
                     onPress={() => {
                       // Xử lý khi nhấn vào nút quản lý bài viết
-                      navigation.navigate("ArticleListScreen");
+                      navigation.navigate("ArticleListScreen", {
+                        roleId: userRoleId,
+                      });
                     }}
                   >
                     <Image source={require("../assets/list_news.png")} />

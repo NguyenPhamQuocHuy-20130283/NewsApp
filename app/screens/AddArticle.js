@@ -18,7 +18,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 
-export default function AddArticle() {
+export default function AddArticle({ route }) {
   const [image, setImage] = useState("");
   const [title, setTitle] = useState("");
   const [selectedItem, setSelectedItem] = useState("");
@@ -26,6 +26,7 @@ export default function AddArticle() {
   const [imageDescription, setImageDescription] = useState("");
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { userId } = route.params;
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -42,11 +43,6 @@ export default function AddArticle() {
 
     fetchData();
   }, []);
-  const getUserId = async () => {
-    const userId = await AsyncStorage.getItem("userId");
-    console.log("User ID:", userId);
-    return userId;
-  };
   const HandleAddArticle = async () => {
     try {
       setLoading(true);
@@ -58,7 +54,6 @@ export default function AddArticle() {
       }
 
       // Get the userId from AsyncStorage
-      const userId = await getUserId();
 
       if (!userId) {
         console.error("User is not authenticated");
