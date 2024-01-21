@@ -9,7 +9,7 @@ import {
   StyleSheet,
   ScrollView,
   SafeAreaView,
-  ActivityIndicator,
+  useWindowDimensions,
   Alert,
   RefreshControl,
   FlatList,
@@ -18,7 +18,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-
+import HTML from "react-native-render-html";
 const ArticleListScreen = ({ route }) => {
   const [activeTab, setActiveTab] = useState("all"); // "all", "PENDING", "PUBLISHED", "CANCEL"
   const [searchText, setSearchText] = useState("");
@@ -26,7 +26,7 @@ const ArticleListScreen = ({ route }) => {
   const { roleId } = route.params;
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false); // Added state for refreshing
-
+  const windowDimensions = useWindowDimensions();
   const getUserId = async () => {
     const userId = await AsyncStorage.getItem("userId");
     console.log("User ID:", userId);
@@ -50,10 +50,18 @@ const ArticleListScreen = ({ route }) => {
         setArticles(response.data);
       }
     } catch (error) {
-      console.error("Error fetching articles:", error);
+      console.log("Error fetching articles:", error);
     } finally {
       setRefreshing(false);
     }
+  };
+  const extractAndShortenText = (htmlContent, maxLength) => {
+    // Strip HTML tags using a regular expression
+    const plainText = htmlContent.replace(/<[^>]*>/g, "");
+
+    return plainText.length > maxLength
+      ? plainText.substring(0, maxLength) + "..."
+      : plainText;
   };
 
   useFocusEffect(
@@ -84,7 +92,7 @@ const ArticleListScreen = ({ route }) => {
     };
     const summary = item.content ? item.content.substring(0, 25) : "";
     const title = item.title ? item.title.substring(0, 25) : "";
-
+    const hasHTMLTags = /<\/?[a-z][\s\S]*>/i.test(item?.content);
     return (
       <TouchableOpacity key={item.id} onPress={navigateToDetail}>
         <View
@@ -94,7 +102,17 @@ const ArticleListScreen = ({ route }) => {
           <Image source={{ uri: item.image }} style={styles.articleImage} />
           <View style={styles.articleDetails}>
             <Text style={styles.articleTitle}>{title + "..."}</Text>
-            <Text style={styles.articleSummary}>{summary + "..."}</Text>
+            <Text style={styles.articleSummary}>
+              {" "}
+              {hasHTMLTags ? (
+                <HTML
+                  source={{ html: extractAndShortenText(item?.content, 25) }}
+                  contentWidth={windowDimensions.width}
+                />
+              ) : (
+                summary + "..."
+              )}
+            </Text>
           </View>
           {/* Move statusContainer and statusLabelText outside of articleDetails */}
           <View style={styles.statusContainer}>

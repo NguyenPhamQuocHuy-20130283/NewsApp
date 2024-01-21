@@ -74,7 +74,7 @@ const Admin = () => {
       // Kiểm tra xem có lỗi không
       if (!response.data.id) {
         // Xử lý khi có lỗi (ví dụ: thông báo lỗi)
-        console.error("Email hoặc mật khẩu không đúng");
+        console.log("Email hoặc mật khẩu không đúng");
         setLoading(false); // Tắt chế độ loading
         return;
       }
@@ -97,7 +97,7 @@ const Admin = () => {
       // Ví dụ: Hiển thị thông báo lỗi
       Alert.alert("Lỗi", "Đăng nhập thất bại. Kiểm tra email và mật khẩu.");
       setLoading(false);
-      console.error("Lỗi khi gọi API đăng nhập", error);
+      console.log("Lỗi khi gọi API đăng nhập", error);
     } finally {
       setLoading(false); // Set loading to false when the login process completes
     }
@@ -151,7 +151,7 @@ const Admin = () => {
               {loading ? (
                 <ActivityIndicator size="large" color="white" />
               ) : (
-                <Text style={styles.buttonText}>Bắt đầu</Text>
+                <Text style={styles.buttonText}>Đăng nhập</Text>
               )}
             </TouchableOpacity>
             <View style={styles.registerContainer}>

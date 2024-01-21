@@ -16,9 +16,6 @@ import {
 import axios from "axios";
 import Icon from "react-native-vector-icons/FontAwesome";
 import * as Crypto from "expo-crypto";
-import { firebaseConfig } from "../../config.js";
-import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
-import firebase from "firebase/compat";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 const Admin_Register = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -34,46 +31,63 @@ const Admin_Register = ({ navigation }) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const vietnamesePhoneNumberRegex = /^(0[23456789]|84[23456789])(\d{8})$/;
   //sendmail
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isEmailConfirmed, setIsEmailConfirmed] = useState(false);
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
 
-  const handleSendVerificationCode = async () => {
+  const handleSendEmail = async () => {
+    setIsSendingEmail(true);
+
     try {
       setLoading(true);
-      const phoneNumberFormatted = parsePhoneNumberFromString(
-        phoneNumber,
-        "VN"
-      ).format("E.164");
-      const phoneProvider = new firebase.auth.PhoneAuthProvider();
-      const verificationId = await phoneProvider.verifyPhoneNumber(
-        phoneNumberFormatted,
-        recaptchaVerifier.current
+      const response = await axios.post(
+        "https://newsapi-springboot-production.up.railway.app/api/mail/sendMail",
+        {
+          email: email,
+        }
       );
-      setVerificationId(verificationId);
-      setIsCodeModalVisible(true);
-      Alert.alert(
-        "Thông báo",
-        "Mã xác thực đã được gửi đến số điện thoại của bạn!"
-      );
-    } catch (err) {
-      Alert.alert("Lỗi", "Gửi mã xác thực thất bại!");
+
+      if (response.status === 200) {
+        Alert.alert("Thông báo", "Mã code đã được gửi đến email của bạn");
+        setLoading(false);
+        setTimeout(() => {
+          setIsSendingEmail(false);
+          setIsCodeModalVisible(true);
+        }, 2000);
+      } else {
+        setLoading(false);
+        Alert.alert("Error", "Failed to send. Please check your email");
+        setIsSendingEmail(false);
+      }
+    } catch (error) {
       setLoading(false);
-      console.log(err);
+      console.log("Error sending email:", error);
+      Alert.alert("Error", "An unexpected error occurred. Please try again.");
+      setIsSendingEmail(false);
     }
   };
-  const confirmCode = async () => {
+
+  const handleConfirmEmail = async () => {
     try {
-      setLoading(true);
-      const credential = firebase.auth.PhoneAuthProvider.credential(
-        verificationId,
-        code
+      const response = await axios.post(
+        "https://newsapi-springboot-production.up.railway.app/api/mail/authenticate",
+        {
+          email: email,
+          code: code,
+        }
       );
-      await firebase.auth().signInWithCredential(credential);
-      setIsCodeModalVisible(false);
-      Alert.alert("Thông báo", "Xác thực thành công!");
-      handleRegisterPress();
-    } catch (err) {
-      Alert.alert("Lỗi", "Xác thực thất bại!");
-      setLoading(false);
-      console.log(err);
+
+      if (response.status === 200) {
+        setIsEmailConfirmed(true);
+        setIsModalVisible(false);
+        handleRegisterPress();
+      } else {
+        Alert.alert("Lỗi", "Mã code không đúng. Vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.log("Error confirming email:", error);
+      Alert.alert("Lỗi", "Mã code không đúng. Vui lòng thử lại.");
     }
   };
 
@@ -120,7 +134,7 @@ const Admin_Register = ({ navigation }) => {
         "Đăng ký thất bại. Email hoặc số điện thoại đã sử dụng!"
       );
       setLoading(false);
-      console.error(error);
+      console.log(error);
     }
   };
 
@@ -173,17 +187,7 @@ const Admin_Register = ({ navigation }) => {
                   onChangeText={(text) => setPhoneNumber(text)}
                 />
               </View>
-
-              <View style={styles.recaptchaContainer}>
-                <FirebaseRecaptchaVerifierModal
-                  ref={recaptchaVerifier}
-                  firebaseConfig={firebaseConfig}
-                />
-              </View>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleSendVerificationCode}
-              >
+              <TouchableOpacity style={styles.button} onPress={handleSendEmail}>
                 {loading ? (
                   <ActivityIndicator size="large" color="white" />
                 ) : (
@@ -222,7 +226,7 @@ const Admin_Register = ({ navigation }) => {
                 onPress={() => {
                   setIsCodeModalVisible(false);
                   // Gọi hàm xác nhận mã code
-                  confirmCode();
+                  handleConfirmEmail();
                 }}
               >
                 <Text style={styles.buttonText}>Xác nhận</Text>
@@ -328,10 +332,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
-  },
-  recaptchaContainer: {
-    alignItems: "center",
-    marginBottom: 20, // Adjust the margin as needed
   },
 });
 export default Admin_Register;
