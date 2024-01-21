@@ -11,10 +11,11 @@ import {
   Modal,
   TouchableHighlight,
   ActivityIndicator,
+  useWindowDimensions,
 } from "react-native";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import HTML from "react-native-render-html";
 const ArticleDetailScreen = ({ route }) => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
@@ -23,7 +24,7 @@ const ArticleDetailScreen = ({ route }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userRoleId, setUserRoleId] = useState("");
-
+  const windowDimensions = useWindowDimensions();
   const fetchArticle = useCallback(async () => {
     try {
       const response = await axios.post(
@@ -99,15 +100,26 @@ const ArticleDetailScreen = ({ route }) => {
       );
 
       // Alert user about the status change
+      switch (status) {
+        case "published":
+          status = "được duyệt";
+          break;
+        case "cancel":
+          status = "bị từ chối";
+          break;
+        default:
+          status = "không xác định";
+      }
+
       Alert.alert(
-        `Article ${status}`,
-        `Article ${article.title} is now ${status}.`
+        `Bài báo ${status}`,
+        `Bài báo ${article.title} đã ${status}.`
       );
 
       // Navigate back and refresh the previous screen
       navigation.goBack();
     } catch (error) {
-      console.error("Error updating article status:", error);
+      console.log("Error updating article status:", error);
       setIsLoading(false);
     }
   };
@@ -118,6 +130,7 @@ const ArticleDetailScreen = ({ route }) => {
     // Close the modal after approving
     toggleModal();
   };
+  const hasHTMLTags = /<\/?[a-z][\s\S]*>/i.test(article?.content);
   return (
     <View style={styles.container}>
       <ScrollView>
@@ -127,7 +140,16 @@ const ArticleDetailScreen = ({ route }) => {
         </View>
 
         <Text style={styles.title}>{article?.title}</Text>
-        <Text style={styles.content}>{article?.content}</Text>
+        <Text style={styles.content}>
+          {hasHTMLTags ? (
+            <HTML
+              source={{ html: article?.content }}
+              contentWidth={windowDimensions.width}
+            />
+          ) : (
+            article?.content
+          )}
+        </Text>
 
         <Image source={{ uri: article?.image }} style={styles.image} />
       </ScrollView>

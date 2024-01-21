@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Button,
   Image,
@@ -17,6 +17,7 @@ import { SelectList } from "react-native-dropdown-select-list";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 
 export default function AddArticle({ route }) {
   const [image, setImage] = useState("");
@@ -28,6 +29,7 @@ export default function AddArticle({ route }) {
   const [loading, setLoading] = useState(false);
   const { userId } = route.params;
   const navigation = useNavigation();
+  const editorRef = useRef();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,7 +39,7 @@ export default function AddArticle({ route }) {
         );
         setCategories(response.data);
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.log("Error fetching categories:", error);
       }
     };
 
@@ -47,8 +49,12 @@ export default function AddArticle({ route }) {
     try {
       setLoading(true);
       // Check if title and image are provided
-      if (!title || !image || !selectedItem) {
-        console.error("Title, image, and category are required");
+      if (!title || !image || !selectedItem || !content) {
+        console.log("Title, image, and category are required");
+        Alert.alert(
+          "Lỗi",
+          "Không thể thêm bài viết với dữ liệu trống. Vui lòng kiểm tra lại."
+        );
         setLoading(false);
         return;
       }
@@ -56,7 +62,7 @@ export default function AddArticle({ route }) {
       // Get the userId from AsyncStorage
 
       if (!userId) {
-        console.error("User is not authenticated");
+        console.log("User is not authenticated");
         setLoading(false);
         return;
       }
@@ -98,10 +104,11 @@ export default function AddArticle({ route }) {
       // Example: navigation.navigate("ArticleList");
     } catch (error) {
       setLoading(false);
-      console.error(
+      console.log(
         "Error adding article:",
         error.response ? error.response.data : error.message
       );
+      Alert.alert("Lỗi", "Không thể thêm bài viết. Vui lòng kiểm tra lại.");
     }
   };
 
@@ -161,16 +168,18 @@ export default function AddArticle({ route }) {
             </View>
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Nội dung</Text>
-              <TextInput
-                style={styles.input_big}
-                multiline={true}
-                numberOfLines={30}
-                value={content}
-                onChangeText={(text) => setContent(text)}
+              <RichToolbar editor={editorRef} style={styles.richToolbar} />
+              <RichEditor
+                ref={editorRef}
+                initialContentHTML={content}
+                onChange={(html) => setContent(html)}
+                initialHeight={100}
+                style={styles.richEditor}
               />
             </View>
+
             <View style={styles.container}>
-              <Text style={styles.label}>Select an Item:</Text>
+              <Text style={styles.label}>Chọn danh mục:</Text>
               <SelectList
                 data={categories.map((category) => ({
                   key: category.id.toString(),
@@ -232,15 +241,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
   },
-  input_big: {
-    height: 200,
-    borderColor: "white",
-    backgroundColor: "#F0F0F0",
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
-    textAlignVertical: "top",
-  },
   button: {
     backgroundColor: "#6941DE",
     borderRadius: 5,
@@ -290,5 +290,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafafa",
     borderWidth: 1,
     borderColor: "#ced4da",
+  },
+  richEditor: {
+    height: 400,
+    backgroundColor: "#F0F0F0",
+    borderWidth: 1,
+  },
+
+  richToolbar: {
+    backgroundColor: "white",
+    height: 50,
   },
 });

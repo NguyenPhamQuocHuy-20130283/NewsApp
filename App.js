@@ -164,7 +164,7 @@ const App = () => {
           name="ChangePassword"
           component={PasswordChangeScreen}
           options={{
-            title: "Change Password",
+            title: "Đổi mật khẩu",
             headerShown: true,
           }}
         />

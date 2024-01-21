@@ -8,9 +8,11 @@ import {
   Alert,
   Modal,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios"; // Don't forget to import axios
+import * as Crypto from "expo-crypto";
 
 const PasswordChangeScreen = ({ navigation }) => {
   const [code, setCode] = useState("");
@@ -22,6 +24,7 @@ const PasswordChangeScreen = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEmailConfirmed, setIsEmailConfirmed] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     fetchEmailById(); // Fetch user email when the component mounts
   }, []);
@@ -63,6 +66,10 @@ const PasswordChangeScreen = ({ navigation }) => {
 
       // Check if the API call was successful
       if (response.status === 200) {
+        Alert.alert(
+          "Thành công",
+          "Email đã được gửi. Vui lòng kiểm tra email."
+        );
         setTimeout(() => {
           setIsSendingEmail(false);
           setIsModalVisible(true);
@@ -74,7 +81,7 @@ const PasswordChangeScreen = ({ navigation }) => {
       }
     } catch (error) {
       // Handle any errors that occurred during the API call
-      console.error("Error sending email:", error);
+      console.log("Error sending email:", error);
       Alert.alert("Error", "An unexpected error occurred. Please try again.");
       setIsSendingEmail(false);
     }
@@ -102,7 +109,7 @@ const PasswordChangeScreen = ({ navigation }) => {
     } catch (error) {
       // Handle any errors that occurred during the API call
       console.log("Error confirming email:", error);
-      Alert.alert("Error", "An unexpected error occurred. Please try again.");
+      Alert.alert("Lỗi", "Mã xác thực không hợp lệ. Vui lòng thử lại.");
     }
   };
 
@@ -113,46 +120,58 @@ const PasswordChangeScreen = ({ navigation }) => {
       return;
     }
     try {
+      setLoading(true);
+      // Hash the password before sending it to the server
+      const oldHashedPassword = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        oldPassword
+      );
+      const newHashedPassword = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        newPassword
+      );
       // Send a POST request to the password update API
       const response = await axios.post(
         "https://newsapi-springboot-production.up.railway.app/api/admin/updatePassword",
         {
           email: userEmail,
-          password: oldPassword, // Assuming you have a state for the old password
-          newPassword: newPassword,
+          password: oldHashedPassword, // Assuming you have a state for the old password
+          newPassword: newHashedPassword,
         }
       );
 
       // Check if the API call was successful
       if (response.status === 200) {
         // Display success message
-        Alert.alert("Success", "Password changed successfully!");
-        navigation.navigate("Admin");
+        Alert.alert("Thành công", "Mật khẩu đã được thay đổi.");
+        navigation.navigate("AdminHome");
       } else {
         // Handle the case where the API call was not successful
-        Alert.alert("Error", "Failed to change password. Please try again.");
+        setLoading(false);
+        Alert.alert("Lỗi", "Mật khẩu cũ không đúng.");
       }
     } catch (error) {
       // Handle any errors that occurred during the API call
-      console.error("Error changing password:", error);
+      setLoading(false);
+      console.log("Error changing password:", error);
       Alert.alert("Error", "An unexpected error occurred. Please try again.");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Change Password</Text>
+      <Text style={styles.title}>Đổi mật khẩu</Text>
 
       {isEmailConfirmed && (
         <Text style={styles.sendingEmailText}>
-          Email confirmed. Please enter your new password.
+          Email đã được xác nhận thành công.
         </Text>
       )}
 
       {!isEmailConfirmed && (
         <TouchableOpacity style={styles.button} onPress={handleSendEmail}>
           <Text style={styles.buttonText}>
-            {isSendingEmail ? "Sending email..." : "Send verification email"}
+            {isSendingEmail ? "Đang gửi email..." : "Gửi email xác nhận"}
           </Text>
         </TouchableOpacity>
       )}
@@ -160,7 +179,7 @@ const PasswordChangeScreen = ({ navigation }) => {
       <Modal visible={isModalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Verify Email</Text>
+            <Text style={styles.modalTitle}>Xác thực Email</Text>
             <TextInput
               style={styles.input}
               placeholder="Enter verification code"
@@ -170,10 +189,10 @@ const PasswordChangeScreen = ({ navigation }) => {
               style={styles.button}
               onPress={handleConfirmEmail}
             >
-              <Text style={styles.buttonText}>Confirm Email</Text>
+              <Text style={styles.buttonText}>Xác thực code</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={styles.cancelText}>Huỷ</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -183,19 +202,19 @@ const PasswordChangeScreen = ({ navigation }) => {
         <>
           <TextInput
             style={styles.input}
-            placeholder="Enter old password"
+            placeholder="Nhập mật khẩu cũ"
             secureTextEntry
             onChangeText={(text) => setOldPassword(text)}
           />
           <TextInput
             style={styles.input}
-            placeholder="Enter new password"
+            placeholder="Nhập mật khẩu mới"
             secureTextEntry
             onChangeText={(text) => setNewPassword(text)}
           />
           <TextInput
             style={styles.input}
-            placeholder="Confirm new password"
+            placeholder="Nhập lại mật khẩu mới"
             secureTextEntry
             onChangeText={(text) => {
               setConfirmPassword(text);
@@ -204,14 +223,18 @@ const PasswordChangeScreen = ({ navigation }) => {
           />
           {!passwordsMatch && (
             <Text style={styles.errorText}>
-              New password and confirm password do not match.
+              Mật khẩu mới và nhập lại mật khẩu không khớp
             </Text>
           )}
           <TouchableOpacity
             style={styles.button}
             onPress={handleChangePassword}
           >
-            <Text style={styles.buttonText}>Change Password</Text>
+            {loading ? (
+              <ActivityIndicator size="large" color="white" />
+            ) : (
+              <Text style={styles.buttonText}>Đổi mật khẩu</Text>
+            )}
           </TouchableOpacity>
         </>
       )}
